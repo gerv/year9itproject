@@ -1,0 +1,49 @@
+#!/usr/bin/python
+
+# Import some useful modules
+import os
+import csv
+import sys
+import glob
+import re
+import time
+
+# Delete all of the old generated files - as it happens, they all begin
+# with "m" (for "mr", "mrs" or "miss") and end with ".html".
+for f in glob.glob("m*.html"):
+    os.remove(f)
+
+# Check that all.csv exists
+if not os.path.isfile("interviews/all.csv"):
+    print "The file interviews/all.csv does not exist. Please create it.\n"
+    exit(1)
+
+# Check that it is newer than all.ods
+if (time.ctime(os.path.getmtime("interviews/all.csv")) < \
+    time.ctime(os.path.getmtime("interviews/all.ods"))):
+    print "all.csv is older than all.ods. Please regenerate it.\n"
+    exit(1)
+    
+# Open the teachers.csv file
+csvfile = open("interviews/all.csv")
+
+# Read it as a CSV file. This method looks at the first row and considers
+# it as column headings, and uses it as the keys in the hash/dict
+reader = csv.DictReader(csvfile)
+
+# Read in the template
+template = open("template.html").read()
+
+for row in reader:
+    # open output file
+    output = open(row['SLUG'] + ".html", "wb")
+
+    text = template
+    
+    # substitute all values
+    for key in reader.fieldnames:
+        text = re.sub("\$" + key, row[key], text)
+    
+    # write data
+    output.write(text)
+    output.close()
