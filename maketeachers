@@ -42,7 +42,11 @@ for row in reader:
     
     # substitute all values
     for key in reader.fieldnames:
-        text = re.sub("\$" + key, row[key], text)
+        if row[key] == "NONE":
+            hidestyle = "<style>#%s { display: none; }</style>" % row[key]
+            text = re.sub("\$" + key, hidestyle, text)
+        else:
+            text = re.sub("\$" + key, row[key], text)
     
     # write data
     output.write(text)
